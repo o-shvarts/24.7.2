@@ -178,4 +178,15 @@ def test_get_api_key_whitout_password(email = valid_email, password = ''):
     assert 'key' not in result,"Авторизация удалась"
 
 
+def test_add_pet_with_4K_photo(name="Мил", animal_type="собак", age=99,
+                            pet_photo='images/hhd.jpg'):
+    """Positive:   Проверка создания карточки питомца с валидными данными с добавлением фотографии в разрешении 4К"""
+
+    _, auth_key = pf.get_api_key(valid_email, valid_password)
+    status, result = pf.add_new_pet(auth_key, name, animal_type, age, pet_photo)
+
+    assert result['name'] == name, "Питомец не создан"
+    assert status == 200, "Ожидаемый статус: 200, полученный статус: {}".format(status)
+
+
 
