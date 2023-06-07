@@ -10,6 +10,9 @@ pf = PetFriends()
 # В некоторых проверках я не использовал переменную "result", запрашивая списки питомцев
 # отдельным вызовом функции "get_list_of_pets", так как в некоторых случаях сервер возвращает ответ в формате HTML
 
+#Так же не совсем понял, как ставить условие на "assert" со статус-кодом - ведь есть конкретные статус-коды для каждой ошибки - 403, 400 и т.д.
+#Нужно ли строго ставить условие на конкретную ошибку (к примеру 403 в случае отсутствия прав доступа) или достаточно, чтобы сервер возвращал ошибку клиента? 
+
 def test_get_api_key_for_valid_user(email = valid_email, password = valid_password):
     """Positive:   Проверка аторизации с валидными данными"""
 
@@ -45,7 +48,7 @@ def test_delete_pet():
     _, MyPets = pf.get_list_of_pets(auth_key, 'my_pets')
 
     if len(MyPets['pets']) == 0:
-        pf.add_new_pet(auth_key, name="кукиш", animal_type="страхолюдство", age="1", pet_photo="images/reser.jpeg")
+        pf.add_new_pet(auth_key, name="кук", animal_type="страхолюдство", age="1", pet_photo="images/reser.jpeg")
         _, MyPets = pf.get_list_of_pets(auth_key, 'my_pets')
 
     pet_id = MyPets['pets'][0]['id']
@@ -64,7 +67,7 @@ def test_delete_pet():
 
 
 
-def test_add_pet_without_photo(name='Весельчак', animal_type='Забавыш', age=21):
+def test_add_pet_without_photo(name='Весельчак', animal_type='Позитивный', age=21):
     """Positive:   Проверка создания карточки питомца без фотографии с валидными данными"""
     _, auth_key = pf.get_api_key(valid_email, valid_password)
     status, result = pf.add_pet_without_photo(auth_key, name, animal_type, age)
@@ -72,7 +75,7 @@ def test_add_pet_without_photo(name='Весельчак', animal_type='Заба�
     assert result['name'] == name, "Питомец не создан"
     assert status == 200, "Ожидаемый статус: 200, полученный статус: {}".format(status)
 
-def test_update_pet(name='Тот же Вeсельчак', animal_type='По-прежнему забавыш',
+def test_update_pet(name='Тот же Вeсельчак', animal_type='По-прежнему на позитиве',
                           age=21):
     """Positive:   Проверка изменения данных в карточке питомца с валидными данными"""
     _, auth_key = pf.get_api_key(valid_email, valid_password)
@@ -117,7 +120,7 @@ def test_set_photo():
 
 
 
-def test_add_new_pet_without_name(name= None, animal_type="интеллектуал", age=7, pet_photo='images/images.jpeg'):
+def test_add_new_pet_with_name_None(name= None, animal_type="интеллектуал", age=7, pet_photo='images/images.jpeg'):
     """Negative:   Проверка на невозможность добавления питомца без имени"""
     _, auth_key = pf.get_api_key(valid_email, valid_password)
 
@@ -125,6 +128,16 @@ def test_add_new_pet_without_name(name= None, animal_type="интеллекту�
     # Исходим из того, что сервер должен корректно обрабатывать подобные запросы,
     # возвращая ошибку со стороны клиента
     assert  400 <= status < 500, "Ожидаемый статус: 4xx, полученный статус: {}".format(status)
+
+def test_add_new_pet_without_name(name= "", animal_type="ГлупыШ", age=7, pet_photo='images/images.jpeg'):
+    """Negative:   Проверка на невозможность добавления питомца с пустым полем 'name' """
+    _, auth_key = pf.get_api_key(valid_email, valid_password)
+
+    status, result = pf.add_new_pet(auth_key, name, animal_type, age, pet_photo)
+    # Исходим из того, что сервер должен корректно обрабатывать подобные запросы,
+    # возвращая ошибку со стороны клиента
+    assert  400 <= status < 500, "Ожидаемый статус: 4xx, полученный статус: {}".format(status)
+
 
 
 def test_delete_without_access():
